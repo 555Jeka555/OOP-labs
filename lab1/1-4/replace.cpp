@@ -30,24 +30,24 @@ void CheckValidArgumentCount(const std::optional<Args>& args)
     }
 }
 
-std::ifstream GetInputFile(std::optional<Args> args)
+std::ifstream GetInputFile(const Args& args)
 {
     std::ifstream inputFile;
-    inputFile.open(args->inputFileName);
+    inputFile.open(args.inputFileName);
     if (!inputFile.is_open())
     {
-        std::cerr << "Failed to open" << args->inputFileName << " for reading" << std::endl;
+        std::cerr << "Failed to open" << args.inputFileName << " for reading" << std::endl;
     }
     return inputFile;
 }
 
-std::ofstream GetOutputFile(std::optional<Args> args)
+std::ofstream GetOutputFile(const Args& args)
 {
     std::ofstream outputFile;
-    outputFile.open(args->outputFileName);
+    outputFile.open(args.outputFileName);
     if (!outputFile.is_open())
     {
-        std::cerr << "Failed to open" << args->outputFileName << " for writing" << std::endl;
+        std::cerr << "Failed to open" << args.outputFileName << " for writing" << std::endl;
     }
     return outputFile;
 }
@@ -55,7 +55,7 @@ std::ofstream GetOutputFile(std::optional<Args> args)
 std::string ReplaceString(const std::string& subject,
                           const std::string& searchString, const std::string& replacementString)
 {
-    if (searchString.empty())
+    if (empty(searchString))
     {
         return subject;
     }
@@ -100,8 +100,8 @@ int main(int argc, char* argv[]) {
         auto args = ParseArgs(argc, argv);
         CheckValidArgumentCount(args);
 
-        std::ifstream inputFile = GetInputFile(args);
-        std::ofstream outputFile = GetOutputFile(args);
+        std::ifstream inputFile = GetInputFile(args.value());
+        std::ofstream outputFile = GetOutputFile(args.value());
 
         CopyStreamWithReplacement(inputFile, outputFile, args->search, args->replace);
 
