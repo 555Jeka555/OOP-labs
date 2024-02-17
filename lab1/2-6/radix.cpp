@@ -10,21 +10,8 @@ const char CHAR_NEGATIVE = '-';
 struct Args {
     int sourceRadix;
     int destRadix;
-    std::string value;
+    int value;
 };
-
-std::optional<Args> ParseArgs(int argc, char* argv[])
-{
-    if (argc != 4)
-    {
-        return std::nullopt;
-    }
-    Args args;
-    args.sourceRadix = std::stoi(argv[1]);
-    args.destRadix = std::stoi(argv[2]);
-    args.value = argv[3];
-    return args;
-}
 
 void CheckValidArgumentCount(const std::optional<Args>& args)
 {
@@ -58,10 +45,10 @@ void CheckValidValueInput(const std::string& value, const int& radix)
             throw std::runtime_error( "Invalid char in value input");
         }
 
-        bool isCharLetterInRadix = radix > c - FIRST_CHAR_LETTER + RADIX_DECIMAL;
-        bool isCharDigitInRadix = radix > c - FIRST_CHAR_DIGIT;
-        bool isCharInRadix = isCharLetter && isCharLetterInRadix
-                || isCharDigit && isCharDigitInRadix || isCharMinus;
+        bool isCharLetterInRadix = isCharLetter && radix > c - FIRST_CHAR_LETTER + RADIX_DECIMAL;
+        bool isCharDigitInRadix = isCharDigit && radix > c - FIRST_CHAR_DIGIT;
+
+        bool isCharInRadix = isCharLetterInRadix || isCharDigitInRadix || isCharMinus;
         if (!isCharInRadix)
         {
             throw std::runtime_error( "Invalid char in radix");
@@ -69,7 +56,7 @@ void CheckValidValueInput(const std::string& value, const int& radix)
     }
 }
 
-int StringToInt(char digit)
+int CharToInt(char digit)
 {
     if (isdigit(digit))
     {
@@ -78,8 +65,9 @@ int StringToInt(char digit)
     return toupper(digit) - FIRST_CHAR_LETTER + RADIX_DECIMAL;
 }
 
-char IntToString(int n)
+char IntToChar(int n)
 {
+    n = abs(n);
     if (n > 10)
     {
         return char(FIRST_CHAR_LETTER + n - RADIX_DECIMAL);
@@ -87,33 +75,51 @@ char IntToString(int n)
     return char(FIRST_CHAR_DIGIT + n);
 }
 
-int ConvertAnyRadixToDecimal(const std::string& value, const int& radix)
+int StringToInt(const std::string& str, const int& radix)
 {
     int result = 0;
-    int power = 0;
-    for (char i : value)
+    int sign = 1;
+    for (char c : str)
     {
-        int digit = StringToInt(i);
+        if (c == CHAR_NEGATIVE)
+        {
+            sign *= -1;
+            continue;
+        }
+        int digit = CharToInt(c);
+
+        if (sign > 0 && result > (std::numeric_limits<int>::max() - digit) / radix)
+        {
+            throw std::runtime_error( "Invalid max value in integer");
+        }
         result = result * radix + digit;
-        ++power;
     }
-    return result;
+    return result * sign;
 }
 
-std::string CovertDecimalToAnyRadix(int decimal, const int& radix, const bool& isNegative)
+std::string IntToString(int n, const int& radix)
 {
-    if (decimal == 0)
+    if (n == 0)
     {
         return "0";
     }
-
+    bool isNegative = n < 0;
     std::string result;
 
-    while (decimal > 0)
+    if (std::numeric_limits<int>::min() != n)
     {
-        int remained = decimal % radix;
-        result = IntToString(remained) + result;
-        decimal /= radix;
+        n = std::abs(n);
+    }
+
+    while (n > 0 || std::numeric_limits<int>::min() == n)
+    {
+        int remained = n % radix;
+        result = IntToChar(remained) + result;
+        n /= radix;
+        if (n < 0)
+        {
+            n *= -1;
+        }
     }
 
     if (isNegative) {
@@ -123,20 +129,22 @@ std::string CovertDecimalToAnyRadix(int decimal, const int& radix, const bool& i
     return result;
 }
 
-std::string ConvertRadix(int sourceRadix, int destRadix, std::string value)
+std::optional<Args> ParseArgs(int argc, char* argv[])
 {
-    CheckValidRadix(sourceRadix);
-    CheckValidRadix(destRadix);
-    CheckValidValueInput(value, sourceRadix);
-
-    bool isNegative = false;
-    if (value[0] == CHAR_NEGATIVE)    {
-        value = value.substr(1, value.size() - 1);
-        isNegative = true;
+    if (argc != 4)
+    {
+        return std::nullopt;
     }
+    Args args;
+    args.sourceRadix = StringToInt(argv[1], RADIX_DECIMAL);
+    CheckValidRadix(args.sourceRadix);
 
-    int decimal = ConvertAnyRadixToDecimal(value, sourceRadix);
-    return CovertDecimalToAnyRadix(decimal, destRadix, isNegative);
+    args.destRadix = StringToInt(argv[2], RADIX_DECIMAL);
+    CheckValidRadix(args.destRadix);
+
+    CheckValidValueInput(argv[3], args.sourceRadix);
+    args.value = StringToInt(argv[3], args.sourceRadix);
+    return args;
 }
 
 int main(int argc, char* argv[]) {
@@ -144,8 +152,7 @@ int main(int argc, char* argv[]) {
     {
         auto args = ParseArgs(argc, argv);
         CheckValidArgumentCount(args);
-        std::string numberConverted = ConvertRadix(args->sourceRadix, args->destRadix, args->value);
-        std::cout << numberConverted << std::endl;
+        std::cout << IntToString(args->value, args->destRadix) << std::endl;
     }
     catch (const std::runtime_error& e)
     {
