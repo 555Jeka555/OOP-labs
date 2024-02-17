@@ -32,7 +32,7 @@ if %errorlevel% == 1 ( goto err )
 
 echo Test 5
 rem Тест минимального integer
-radix.exe 10 16 -2147483647 > %OUTPUT_FILE%
+radix.exe 10 16 -2147483648 > %OUTPUT_FILE%
 if %errorlevel% == 1 ( goto err )
 fc test-data\test5.txt %OUTPUT_FILE%
 if %errorlevel% == 1 ( goto err )
@@ -105,6 +105,20 @@ rem Тест максимального integer
 radix.exe 16 10 2147483648 > %OUTPUT_FILE%
 if %errorlevel% == 0 ( goto err )
 fc test-data\test15.txt %OUTPUT_FILE%
+if %errorlevel% == 1 ( goto err )
+
+echo Test 16
+rem Тест минимального integer
+radix.exe 16 10 -142929835593 > %OUTPUT_FILE%
+if %errorlevel% == 0 ( goto err )
+fc test-data\test16.txt %OUTPUT_FILE%
+if %errorlevel% == 1 ( goto err )
+
+echo Test 17
+rem Тест значения с минусом по середине
+radix.exe 16 10 214748-3648 > %OUTPUT_FILE%
+if %errorlevel% == 0 ( goto err )
+fc test-data\test17.txt %OUTPUT_FILE%
 if %errorlevel% == 1 ( goto err )
 
 
