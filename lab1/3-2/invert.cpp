@@ -5,6 +5,7 @@ const char CHAR_DOT = '.';
 const char SPACE = ' ';
 const int NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT = 3;
 const int DEFAULT_VALUE_IN_ARRAY = 0;
+const char SEPARATOR_TO_PRINT_MATRIX = ' ';
 
 void CheckValidArgumentCount(const int& argc)
 {
@@ -33,13 +34,21 @@ void CheckValidLineInput(const std::string& line)
     }
 }
 
+void CheckDeterminantIsZero(const float& determinant)
+{
+    if (determinant == 0)
+    {
+        throw std::runtime_error("The inverse matrix cannot be found, since the determinant of the matrix is zero");
+    }
+}
+
 std::ifstream GetInputFile(const std::string& inputFileName)
 {
     std::ifstream inputFile;
     inputFile.open(inputFileName);
     if (!inputFile.is_open())
     {
-        std::cerr << "Failed to open" << inputFileName << " for writing" << std::endl;
+        throw std::runtime_error( "Failed to open " + inputFileName + " for writing");
     }
     return inputFile;
 }
@@ -80,7 +89,11 @@ float GetDeterminantOfMatrixX2(const std::vector<std::vector<float>>& matrix)
     return matrix[0][0]*matrix[1][1] - matrix[0][1]*matrix[1][0];
 }
 
-std::vector<std::vector<float>> GetMatrixByMinor(const std::vector<std::vector<float>>& matrix, int i, int j)
+std::vector<std::vector<float>> GetMatrixByMinor(
+        const std::vector<std::vector<float>>& matrix,
+        const int& i,
+        const int& j
+        )
 {
     std::vector<std::vector<float>> matrixByMinor(2, std::vector<float>(2, DEFAULT_VALUE_IN_ARRAY));
     for (int majorX = 0, minorX = 0; majorX < 3; majorX++)
@@ -109,21 +122,25 @@ float GetDeterminantOfMatrixX3(const std::vector<std::vector<float>>& matrix)
     for (int i = 0; i < 3; i++)
     {
         std::vector<std::vector<float>> matrixByMinor = GetMatrixByMinor(matrix, 0, i);
-        determinant += (float)(i == 1 ? -1 : 1) * matrix[0][i] * GetDeterminantOfMatrixX2(matrixByMinor);
+        determinant += static_cast<float>(i == 1 ? -1 : 1) * matrix[0][i] * GetDeterminantOfMatrixX2(matrixByMinor);
     }
     return determinant;
 }
 
-std::vector<std::vector<float>> GetTransposedMatrix(const std::vector<std::vector<float>>& matrix)
+std::vector<std::vector<float>> GetTransposedUnionMatrix(const std::vector<std::vector<float>>& matrix)
 {
     int dimension = static_cast<int>(matrix.size());
-    std::vector<std::vector<float>> transposedMatrix(dimension, std::vector<float>(dimension, DEFAULT_VALUE_IN_ARRAY));
+    std::vector<std::vector<float>> transposedMatrix(
+            dimension,
+            std::vector<float>(dimension, DEFAULT_VALUE_IN_ARRAY)
+    );
+
     for (int i = 0; i < matrix.size(); i++)
     {
         for (int j = 0; j < matrix.size(); j++)
         {
             std::vector<std::vector<float>> matrixByMinor = GetMatrixByMinor(matrix, i, j);
-            transposedMatrix[j][i] = (float)std::pow(-1, i+j) * GetDeterminantOfMatrixX2(matrixByMinor);
+            transposedMatrix[j][i] = static_cast<float>(std::pow(-1, i+j)) * GetDeterminantOfMatrixX2(matrixByMinor);
         }
     }
 
@@ -141,24 +158,44 @@ void mulMatrixByNumber(std::vector<std::vector<float>>& matrix, const float& num
     }
 }
 
+void printMatrix(std::vector<std::vector<float>>& matrix)
+{
+    for (const auto& row : matrix) {
+        int elementIndex = 0;
+        for (const auto& element : row) {
+            std::cout << std::setprecision(NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT)
+                      << std::fixed << element;
+            elementIndex++;
+            if (elementIndex < row.size() - 2)
+            {
+                std::cout << SEPARATOR_TO_PRINT_MATRIX;
+            }
+        }
+        std::cout << std::endl;
+    }
+}
+
+void invertMatrixX3(std::ifstream& inputFile)
+{
+    std::vector<std::vector<float>> matrix = GetMatrixByFile(inputFile);
+
+    float determinant = GetDeterminantOfMatrixX3(matrix);
+    CheckDeterminantIsZero(determinant);
+
+    float multiplier = 1/determinant;
+    std::vector<std::vector<float>> transposedMatrix = GetTransposedUnionMatrix(matrix);
+    mulMatrixByNumber(transposedMatrix, multiplier);
+
+    printMatrix(transposedMatrix);
+}
+
 int main(int argc, char *argv[])
 {
     try
     {
         CheckValidArgumentCount(argc);
         std::ifstream inputFile = GetInputFile(argv[1]);
-        std::vector<std::vector<float>> matrix = GetMatrixByFile(inputFile);
-        float determinant = GetDeterminantOfMatrixX3(matrix);
-        std::vector<std::vector<float>> transposedMatrix = GetTransposedMatrix(matrix);
-        mulMatrixByNumber(transposedMatrix, 1/determinant);
-
-        for (const auto& row : transposedMatrix) {
-            for (const auto& element : row) {
-                std::cout << std::setprecision(NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT)
-                    << std::fixed << element << "\t";
-            }
-            std::cout << std::endl;
-        }
+        invertMatrixX3(inputFile);
     }
     catch (const std::runtime_error &e)
     {

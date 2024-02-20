@@ -1,0 +1,1 @@
+Invalid input matrix. Matrix must consist of digits
