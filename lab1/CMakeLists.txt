@@ -22,3 +22,12 @@ set_target_properties(replace PROPERTIES
 
 set_target_properties(replace PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3-2/invert")
+
+add_custom_command(
+        TARGET invert
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Running post-build script"
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/3-2/test.bat"
+        COMMENT "Running post-build script"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/3-2/invert.cpp"  # Указание зависимости от .cpp файла
+)

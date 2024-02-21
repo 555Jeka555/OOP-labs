@@ -37,6 +37,20 @@ if %errorlevel% == 0 ( goto err )
 fc test-data\test-output4.txt %OUTPUT_FILE%
 if %errorlevel% == 1 ( goto err )
 
+echo Test 6
+rem “ест матрицы c вещественными числами
+invert.exe test-data\test-input5.txt > %OUTPUT_FILE%
+if %errorlevel% == 1 ( goto err )
+fc test-data\test-output5.txt %OUTPUT_FILE%
+if %errorlevel% == 1 ( goto err )
+
+echo Test 7
+rem “ест матрицы c очень малыми вещественными числами
+invert.exe test-data\test-input6.txt > %OUTPUT_FILE%
+if %errorlevel% == 1 ( goto err )
+fc test-data\test-output6.txt %OUTPUT_FILE%
+if %errorlevel% == 1 ( goto err )
+
 echo Success!
 exit /B 1
 

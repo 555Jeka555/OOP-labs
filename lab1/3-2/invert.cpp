@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 const char CHAR_NEGATIVE = '-';
-const char CHAR_DOT = '.';
+const char CHAR_POINT_DECIMAL = '.';
 const char SPACE = ' ';
 const int NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT = 3;
 const int DEFAULT_VALUE_IN_ARRAY = 0;
@@ -20,7 +20,7 @@ void CheckValidLineInput(const std::string& line)
     bool isMinusFirst = true;
     for (char c : line)
     {
-        bool isValidChar = std::isdigit(c) || (c == CHAR_NEGATIVE && isMinusFirst) || c == CHAR_DOT || c == SPACE;
+        bool isValidChar = std::isdigit(c) || (c == CHAR_NEGATIVE && isMinusFirst) || c == CHAR_POINT_DECIMAL || c == SPACE;
         if (!isValidChar)
         {
             throw std::runtime_error("Invalid input matrix. Matrix must consist of digits");
@@ -143,7 +143,6 @@ std::vector<std::vector<float>> GetTransposedUnionMatrix(const std::vector<std::
             transposedMatrix[j][i] = static_cast<float>(std::pow(-1, i+j)) * GetDeterminantOfMatrixX2(matrixByMinor);
         }
     }
-
     return transposedMatrix;
 }
 
@@ -158,15 +157,37 @@ void mulMatrixByNumber(std::vector<std::vector<float>>& matrix, const float& num
     }
 }
 
+void handlerNegativeZeroWithNumbersDecimalPoint(std::stringstream& ss)
+{
+    std::string negZeroWithNumbersDecimalPoint = "-0";
+    
+    for (int i = 0; i < NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT; i++)
+    {
+        if (i == 0)
+        {
+            negZeroWithNumbersDecimalPoint += CHAR_POINT_DECIMAL;
+        }
+        negZeroWithNumbersDecimalPoint += "0";
+    }
+
+    if (ss.str() == negZeroWithNumbersDecimalPoint)
+    {
+        ss.str(negZeroWithNumbersDecimalPoint.substr(1, negZeroWithNumbersDecimalPoint.size() - 1));
+    }
+}
+
 void printMatrix(std::vector<std::vector<float>>& matrix)
 {
     for (const auto& row : matrix) {
         int elementIndex = 0;
         for (const auto& element : row) {
-            std::cout << std::setprecision(NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT)
-                      << std::fixed << element;
+            std::stringstream ss;
+            ss << std::setprecision(NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT) << std::fixed << element;
+            handlerNegativeZeroWithNumbersDecimalPoint(ss);
+            std::cout << ss.str();
+
             elementIndex++;
-            if (elementIndex < row.size() - 2)
+            if (elementIndex <= row.size() - 1)
             {
                 std::cout << SEPARATOR_TO_PRINT_MATRIX;
             }
@@ -175,15 +196,15 @@ void printMatrix(std::vector<std::vector<float>>& matrix)
     }
 }
 
-void invertMatrixX3(std::ifstream& inputFile)
+void InvertMatrixX3(std::ifstream& inputFile)
 {
     std::vector<std::vector<float>> matrix = GetMatrixByFile(inputFile);
-
     float determinant = GetDeterminantOfMatrixX3(matrix);
     CheckDeterminantIsZero(determinant);
 
     float multiplier = 1/determinant;
     std::vector<std::vector<float>> transposedMatrix = GetTransposedUnionMatrix(matrix);
+
     mulMatrixByNumber(transposedMatrix, multiplier);
 
     printMatrix(transposedMatrix);
@@ -195,7 +216,7 @@ int main(int argc, char *argv[])
     {
         CheckValidArgumentCount(argc);
         std::ifstream inputFile = GetInputFile(argv[1]);
-        invertMatrixX3(inputFile);
+        InvertMatrixX3(inputFile);
     }
     catch (const std::runtime_error &e)
     {

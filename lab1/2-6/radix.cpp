@@ -122,7 +122,6 @@ std::optional<Args> ParseArgs(int argc, char *argv[]) {
     return args;
 }
 
-//TODO: Событие после сборки для тестов
 int main(int argc, char *argv[]) {
     try {
         auto args = ParseArgs(argc, argv);
