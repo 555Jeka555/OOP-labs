@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <optional>
-#include <vector>
+#include <array>
 #include <iomanip>
 #include <cmath>
+#include <limits>

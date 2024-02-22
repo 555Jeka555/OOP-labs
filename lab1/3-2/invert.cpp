@@ -6,10 +6,13 @@ const char SPACE = ' ';
 const int NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT = 3;
 const int DEFAULT_VALUE_IN_ARRAY = 0;
 const char SEPARATOR_TO_PRINT_MATRIX = ' ';
+const int DIMENSION_MATRIX_OF_3 = 3;
+const int DIMENSION_MATRIX_OF_2 = 2;
 
-void CheckValidArgumentCount(const int& argc)
+void CheckValidArgumentCount(const int argc)
 {
-    if (argc != 2) {
+    if (argc != 2)
+    {
         throw std::runtime_error("Invalid argument count\n"
                                  "Usage: invert.exe <matrix file.txt>");
     }
@@ -34,11 +37,19 @@ void CheckValidLineInput(const std::string& line)
     }
 }
 
-void CheckDeterminantIsZero(const float& determinant)
+void CheckDeterminantIsZero(const float determinant)
 {
     if (determinant == 0)
     {
         throw std::runtime_error("The inverse matrix cannot be found, since the determinant of the matrix is zero");
+    }
+}
+
+void CheckValidDimensionMatrixOf3(int index)
+{
+    if (index != DIMENSION_MATRIX_OF_3)
+    {
+        throw std::runtime_error("Invalid input matrix. Matrix must be 3x3");
     }
 }
 
@@ -53,49 +64,58 @@ std::ifstream GetInputFile(const std::string& inputFileName)
     return inputFile;
 }
 
-void AppendLineToMatrix(std::vector<std::vector<float>>& matrix, const std::string& line)
+void AppendLineToMatrix(
+        std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3>& matrix,
+        const std::string& line,
+        int i
+        )
 {
     std::istringstream iss(line);
-    std::vector<float> numbers;
+    std::array<float, DIMENSION_MATRIX_OF_3> numbers = {DEFAULT_VALUE_IN_ARRAY};
     float number;
 
+    int j = 0;
     while (iss >> number)
     {
-        numbers.push_back(number);
+        numbers[j] = number;
+        j++;
     }
 
-    if (numbers.size() != 3)
-    {
-        throw std::runtime_error("Invalid input matrix. Matrix must be 3x3");
-    }
+    CheckValidDimensionMatrixOf3(j);
 
-    matrix.push_back(numbers);
+    matrix[i] = numbers;
 }
 
-std::vector<std::vector<float>> GetMatrixByFile(std::istream& inputFile)
+std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3> GetMatrixByFile(std::istream& inputFile)
 {
-    std::vector<std::vector<float>> matrix;
+    std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3> matrix = {DEFAULT_VALUE_IN_ARRAY};
     std::string line;
+
+    int i = 0;
     while (std::getline(inputFile, line))
     {
         CheckValidLineInput(line);
-        AppendLineToMatrix(matrix, line);
+        AppendLineToMatrix(matrix, line, i);
+        i++;
     }
+    CheckValidDimensionMatrixOf3(i);
+
     return matrix;
 }
 
-float GetDeterminantOfMatrixX2(const std::vector<std::vector<float>>& matrix)
+float GetDeterminantOfMatrixX2(const std::array<std::array<float, DIMENSION_MATRIX_OF_2>, DIMENSION_MATRIX_OF_2>& matrix)
 {
     return matrix[0][0]*matrix[1][1] - matrix[0][1]*matrix[1][0];
 }
 
-std::vector<std::vector<float>> GetMatrixByMinor(
-        const std::vector<std::vector<float>>& matrix,
-        const int& i,
-        const int& j
+std::array<std::array<float, DIMENSION_MATRIX_OF_2>, DIMENSION_MATRIX_OF_2> GetMatrixByMinor(
+        const std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3>& matrix,
+        const int i,
+        const int j
         )
 {
-    std::vector<std::vector<float>> matrixByMinor(2, std::vector<float>(2, DEFAULT_VALUE_IN_ARRAY));
+    std::array<std::array<float, DIMENSION_MATRIX_OF_2>, DIMENSION_MATRIX_OF_2> matrixByMinor = {DEFAULT_VALUE_IN_ARRAY};
+
     for (int majorX = 0, minorX = 0; majorX < 3; majorX++)
     {
         if (majorX == i)
@@ -116,37 +136,34 @@ std::vector<std::vector<float>> GetMatrixByMinor(
     return matrixByMinor;
 }
 
-float GetDeterminantOfMatrixX3(const std::vector<std::vector<float>>& matrix)
+float GetDeterminantOfMatrixX3(const std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3>& matrix)
 {
     float determinant = 0;
     for (int i = 0; i < 3; i++)
     {
-        std::vector<std::vector<float>> matrixByMinor = GetMatrixByMinor(matrix, 0, i);
+        std::array<std::array<float, DIMENSION_MATRIX_OF_2>, DIMENSION_MATRIX_OF_2> matrixByMinor = GetMatrixByMinor(matrix, 0, i);
         determinant += static_cast<float>(i == 1 ? -1 : 1) * matrix[0][i] * GetDeterminantOfMatrixX2(matrixByMinor);
     }
     return determinant;
 }
 
-std::vector<std::vector<float>> GetTransposedUnionMatrix(const std::vector<std::vector<float>>& matrix)
+std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3> GetTransposedUnionMatrix
+(const std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3>& matrix)
 {
-    int dimension = static_cast<int>(matrix.size());
-    std::vector<std::vector<float>> transposedMatrix(
-            dimension,
-            std::vector<float>(dimension, DEFAULT_VALUE_IN_ARRAY)
-    );
+    std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3> transposedMatrix = {DEFAULT_VALUE_IN_ARRAY};
 
     for (int i = 0; i < matrix.size(); i++)
     {
         for (int j = 0; j < matrix.size(); j++)
         {
-            std::vector<std::vector<float>> matrixByMinor = GetMatrixByMinor(matrix, i, j);
+            std::array<std::array<float, DIMENSION_MATRIX_OF_2>, DIMENSION_MATRIX_OF_2> matrixByMinor = GetMatrixByMinor(matrix, i, j);
             transposedMatrix[j][i] = static_cast<float>(std::pow(-1, i+j)) * GetDeterminantOfMatrixX2(matrixByMinor);
         }
     }
     return transposedMatrix;
 }
 
-void mulMatrixByNumber(std::vector<std::vector<float>>& matrix, const float& number)
+void MulMatrixByNumber(std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3>& matrix, const float number)
 {
     for (int i = 0; i < matrix.size(); i++)
     {
@@ -157,7 +174,7 @@ void mulMatrixByNumber(std::vector<std::vector<float>>& matrix, const float& num
     }
 }
 
-void handlerNegativeZeroWithNumbersDecimalPoint(std::stringstream& ss)
+void HandlerNegativeZeroWithNumbersDecimalPoint(std::stringstream& ss)
 {
     std::string negZeroWithNumbersDecimalPoint = "-0";
     
@@ -176,18 +193,18 @@ void handlerNegativeZeroWithNumbersDecimalPoint(std::stringstream& ss)
     }
 }
 
-void printMatrix(std::vector<std::vector<float>>& matrix)
+void PrintMatrix(std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3>& matrix)
 {
-    for (const auto& row : matrix) {
+    for (int i = 0; i < DIMENSION_MATRIX_OF_3; i++) {
         int elementIndex = 0;
-        for (const auto& element : row) {
+        for (int j = 0; j < DIMENSION_MATRIX_OF_3; j++) {
             std::stringstream ss;
-            ss << std::setprecision(NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT) << std::fixed << element;
-            handlerNegativeZeroWithNumbersDecimalPoint(ss);
+            ss << std::setprecision(NUMBER_OF_SIGNIFICANT_DIGITS_AFTER_DECIMAL_POINT) << std::fixed << matrix[i][j];
+            HandlerNegativeZeroWithNumbersDecimalPoint(ss);
             std::cout << ss.str();
 
             elementIndex++;
-            if (elementIndex <= row.size() - 1)
+            if (elementIndex <= matrix[i].size() - 1)
             {
                 std::cout << SEPARATOR_TO_PRINT_MATRIX;
             }
@@ -196,27 +213,30 @@ void printMatrix(std::vector<std::vector<float>>& matrix)
     }
 }
 
-void InvertMatrixX3(std::ifstream& inputFile)
+std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3> InvertMatrixX3(std::ifstream& inputFile)
 {
-    std::vector<std::vector<float>> matrix = GetMatrixByFile(inputFile);
+    std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3> matrix = GetMatrixByFile(inputFile);
+
     float determinant = GetDeterminantOfMatrixX3(matrix);
     CheckDeterminantIsZero(determinant);
 
     float multiplier = 1/determinant;
-    std::vector<std::vector<float>> transposedMatrix = GetTransposedUnionMatrix(matrix);
+    std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3> transposedMatrix = GetTransposedUnionMatrix(matrix);
 
-    mulMatrixByNumber(transposedMatrix, multiplier);
+    MulMatrixByNumber(transposedMatrix, multiplier);
 
-    printMatrix(transposedMatrix);
+    return transposedMatrix;
 }
 
+//TODO: тест на переполнение
 int main(int argc, char *argv[])
 {
     try
     {
         CheckValidArgumentCount(argc);
         std::ifstream inputFile = GetInputFile(argv[1]);
-        InvertMatrixX3(inputFile);
+        std::array<std::array<float, DIMENSION_MATRIX_OF_3>, DIMENSION_MATRIX_OF_3> matrix = InvertMatrixX3(inputFile);
+        PrintMatrix(matrix);
     }
     catch (const std::runtime_error &e)
     {
