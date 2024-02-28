@@ -13,31 +13,45 @@ const std::string SIGN_LESS_ENCODE = "&lt;";
 const std::string SIGN_MORE_ENCODE = "&gt;";
 const std::string AMPERSAND_ENCODE = "&amp;";
 
-void AddDecodeEntityToResult(const std::string& entity, std::string& result)
+void AddDecodeEntityToResult(const std::string& entity, std::string& result, int& i, int j)
 {
     if (entity == DOUBLE_QUOTATION_MARK_ENCODE)
     {
         result += DOUBLE_QUOTATION_MARK_DECODE;
+        i = j;
     }
     else if (entity == APOSTROPHE_ENCODE)
     {
         result += APOSTROPHE_DECODE;
+        i = j;
     }
     else if (entity == SIGN_LESS_ENCODE)
     {
         result += SIGN_LESS_DECODE;
+        i = j;
     }
     else if (entity == SIGN_MORE_ENCODE)
     {
         result += SIGN_MORE_DECODE;
+        i = j;
     }
     else if (entity == AMPERSAND_ENCODE)
     {
         result += AMPERSAND_DECODE_STRING;
+        i = j;
     }
     else
     {
-        result += entity;
+        int j = entity.find(AMPERSAND_DECODE_CHAR, 0);
+        if (j != std::string::npos)
+        {
+            result += entity[0];
+        }
+        else
+        {
+            result += entity;
+            i = j;
+        }
     }
 }
 
@@ -53,8 +67,7 @@ std::string HtmlDecode(std::string const& encodeHTML)
             if (j != std::string::npos)
             {
                 std::string entity = encodeHTML.substr(i, j - i + 1);
-                AddDecodeEntityToResult(entity, result);
-                i = j;
+                AddDecodeEntityToResult(entity, result, i, j);
             }
             else
             {

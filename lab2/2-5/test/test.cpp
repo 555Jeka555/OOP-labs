@@ -10,23 +10,31 @@ TEST (html_decode, decode_with_all_entities)
 
 TEST (html_decode, decode_all_entities_together)
 {
-    std::string encodeHTML = "&lt;&gt;&quot;&quot;&amp;&apos;";
-    std::string expectedDecodeHTML = "<>\"\"&'";
+    std::string encodeHTML = "&lt;&gt;&quot;&amp;&apos;";
+    std::string expectedDecodeHTML = "<>\"&'";
     EXPECT_EQ(expectedDecodeHTML, HtmlDecode(encodeHTML));
 }
 
-TEST (html_decode, decode_with_all_entities_invalid)
+TEST (html_decode, decode_with_invalid_entities)
 {
-    std::string encodeHTML = "&lt&gt&quot&quot&amp&apos";
-    std::string expectedDecodeHTML = "&lt&gt&quot&quot&amp&apos";
+    std::string encodeHTML = "&lt&gt&quot&amp&apos";
+    std::string expectedDecodeHTML = "&lt&gt&quot&amp&apos";
     EXPECT_EQ(expectedDecodeHTML, HtmlDecode(encodeHTML));
 
-    encodeHTML = "lt;gt;quot;quot;amp;apos;";
-    expectedDecodeHTML = "lt;gt;quot;quot;amp;apos;";
+    encodeHTML = "lt;gt;quot;amp;apos;";
+    expectedDecodeHTML = "lt;gt;quot;amp;apos;";
     EXPECT_EQ(expectedDecodeHTML, HtmlDecode(encodeHTML));
 
     encodeHTML = "&ltgt;quot;&quotamp;apos;";
     expectedDecodeHTML = "&ltgt;quot;&quotamp;apos;";
+    EXPECT_EQ(expectedDecodeHTML, HtmlDecode(encodeHTML));
+
+    encodeHTML = "&lt;&&&&gt;&quot;&amp;&&&&apos;";
+    expectedDecodeHTML = "<&&&>\"&&&&'";
+    EXPECT_EQ(expectedDecodeHTML, HtmlDecode(encodeHTML));
+
+    encodeHTML = "&lt;&gt;;;;;&quot;&amp;&&&&apos;;;";
+    expectedDecodeHTML = "<>;;;;\"&&&&';;";
     EXPECT_EQ(expectedDecodeHTML, HtmlDecode(encodeHTML));
 }
 
