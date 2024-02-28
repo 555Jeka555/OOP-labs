@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 
-void HandleNumbersByArithmeticMean(std::vector<float> &numbers);
+void HandleNumbersByArithmeticMean(std::vector<double> &numbers);
+void SortNumbers(std::vector<double> &numbers);
 
 #endif //INC_1_1_ARITHMETIC_MEAN_H

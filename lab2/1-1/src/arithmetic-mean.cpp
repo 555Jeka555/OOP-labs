@@ -1,27 +1,27 @@
 #include "arithmetic-mean.h"
 
-void HandleNumbersByArithmeticMean(std::vector<float> &numbers) {
-    float sumPosNumber = std::accumulate(numbers.begin(), numbers.end(), 0,
-                                         [](float acc, float val)
-                                         {
-                                             return val > 0 ? acc + val : acc;
-                                         });
+void HandleNumbersByArithmeticMean(std::vector<double> &numbers)
+{
+    std::vector<double> positiveNumbers;
+    std::copy_if(numbers.begin(), numbers.end(), std::back_inserter(positiveNumbers),
+                 [](double x) { return x > 0; });
 
-    float countPosNumber = std::accumulate(numbers.begin(), numbers.end(), 0,
-                                           [](float acc, float val)
-                                           {
-                                               return val > 0 ? ++acc : acc;
-                                           });
-
-    if (countPosNumber == 0)
+    auto countPositiveNumber = static_cast<double>(positiveNumbers.size());
+    if (countPositiveNumber == 0)
     {
         return;
     }
 
-    float arithmeticMean = sumPosNumber / countPosNumber;
+    double sumPositiveNumber = std::accumulate(positiveNumbers.begin(), positiveNumbers.end(), 0.0);
+    double arithmeticMean = sumPositiveNumber / countPositiveNumber;
 
-    for (float & number : numbers)
+    for (double & number : numbers)
     {
         number = number + arithmeticMean;
     }
+}
+
+void SortNumbers(std::vector<double> &numbers)
+{
+    std::sort(numbers.begin(), numbers.end());
 }

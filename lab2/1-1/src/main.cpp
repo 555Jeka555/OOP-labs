@@ -3,11 +3,11 @@
 
 const std::string SEPARATOR = ", ";
 
-std::vector<float> ReadNumbers() {
-    std::vector<float> numbers(std::istream_iterator<float>(std::cin), (std::istream_iterator<float>()));
+std::vector<double> ReadNumbers() {
+    std::vector<double> numbers(std::istream_iterator<double>(std::cin), (std::istream_iterator<double>()));
 
     while (!std::cin.eof()) {
-        float number;
+        double number;
         if (std::cin >> number) {
             numbers.push_back(number);
         } else {
@@ -20,7 +20,7 @@ std::vector<float> ReadNumbers() {
     return numbers;
 }
 
-void PrintNumbers(const std::vector<float> &numbers) {
+void PrintNumbers(const std::vector<double> &numbers) {
     for (int i = 0; i < numbers.size(); i++) {
         std::cout << numbers[i];
         if (i != numbers.size() - 1) {
@@ -30,11 +30,10 @@ void PrintNumbers(const std::vector<float> &numbers) {
     std::cout << std::endl;
 }
 
-
 int main() {
-    std::vector<float> numbers = ReadNumbers();
+    std::vector<double> numbers = ReadNumbers();
     HandleNumbersByArithmeticMean(numbers);
-    std::sort(numbers.begin(), numbers.end());
+    SortNumbers(numbers);
     PrintNumbers(numbers);
     return 0;
 }
