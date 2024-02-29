@@ -21,6 +21,7 @@ void HandleNumbersByArithmeticMean(std::vector<double> &numbers)
     }
 }
 
+//TODO: форматирование и считывание
 void SortNumbers(std::vector<double> &numbers)
 {
     std::sort(numbers.begin(), numbers.end());
