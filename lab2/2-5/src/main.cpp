@@ -4,7 +4,9 @@
 int main()
 {
     std::string encodeHTML;
-    std::getline(std::cin, encodeHTML);
-    std::cout << HtmlDecode(encodeHTML) << std::endl;
+    while(std::getline(std::cin, encodeHTML))
+    {
+        std::cout << HtmlDecode(encodeHTML) << std::endl;
+    }
     return 0;
 }
