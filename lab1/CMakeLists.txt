@@ -12,7 +12,12 @@ add_executable(radix 2-6/radix.cpp
         2-6/stdafx.h)
 
 add_executable(invert 3-2/invert.cpp
-        3-2/stdafx.h)
+        3-2/stdafx.h
+        4-3/crypt.cpp)
+
+add_executable(crypt 4-3/crypt.cpp
+        4-3/stdafx.h
+        4-3/crypt.cpp)
 
 set_target_properties(replace PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/1-4/replace")
@@ -31,3 +36,6 @@ add_custom_command(
         COMMENT "Running post-build script"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/3-2/invert.cpp"  # Указание зависимости от .cpp файла
 )
+
+set_target_properties(replace PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/4-3/crypt")
