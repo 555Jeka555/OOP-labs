@@ -43,6 +43,22 @@ TEST (prime, max_boundary_value)
     EXPECT_EQ(primes.size(), dimension);
 }
 
+TEST (prime, zero_value)
+{
+    std::set<int> expected = {};
+    std::set<int> primes = GeneratePrimeNumbersSet(0);
+
+    EXPECT_EQ(expected, primes);
+}
+
+TEST (prime, one_value)
+{
+    std::set<int> expected = {};
+    std::set<int> primes = GeneratePrimeNumbersSet(1);
+
+    EXPECT_EQ(expected, primes);
+}
+
 GTEST_API_ int main (int argc, char **argv)
 {
     std::cout << "Running tests" << std::endl;
