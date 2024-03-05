@@ -98,7 +98,7 @@ void CheckReadingInputFile(const std::ifstream& inputFile)
     }
 }
 
-unsigned char MixBits(unsigned char byte)
+unsigned char CryptBits(unsigned char byte)
 {
     unsigned char result = 0;
 
@@ -110,7 +110,7 @@ unsigned char MixBits(unsigned char byte)
     return result;
 }
 
-unsigned char UnmixBits(unsigned char byte)
+unsigned char DecryptBits(unsigned char byte)
 {
     unsigned char result = 0;
 
@@ -128,7 +128,7 @@ void CryptFile(std::ifstream& inputFile, std::ofstream& outputFile, int key)
     while (inputFile.read(&byte, sizeof(byte)))
     {
         byte = static_cast<char>(byte ^ key);
-        outputFile.put(static_cast<char>(MixBits(byte)));
+        outputFile.put(static_cast<char>(CryptBits(byte)));
     }
 
     CheckReadingInputFile(inputFile);
@@ -139,7 +139,7 @@ void DecryptFile(std::ifstream& inputFile, std::ofstream& outputFile, int key)
     char byte;
     while (inputFile.read(&byte, sizeof(byte)))
     {
-        byte = static_cast<char>(UnmixBits(byte) ^ key);
+        byte = static_cast<char>(DecryptBits(byte) ^ key);
         outputFile.put(byte);
     }
 
