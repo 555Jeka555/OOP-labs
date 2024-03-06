@@ -34,6 +34,9 @@ void CheckFlushToOutputFile(std::ofstream& outputFile)
 int main(int argc, char *argv[]) {
     try
     {
+        SetConsoleOutputCP(1251);
+        SetConsoleCP(1251);
+
         CheckValidArgumentCount(argc);
 
         std::string outputFileName = argv[1];
