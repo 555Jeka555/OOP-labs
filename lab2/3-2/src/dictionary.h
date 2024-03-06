@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 
-void InitSessionTranslate(std::ofstream& outputFile);
+void InitSessionTranslate(const std::string& dictFileName);
 void AddTranslate(std::map<std::string, std::vector<std::string>>& enToRuDict,
                   std::map<std::string, std::vector<std::string>>& ruToEnDict,
                   const std::string& enter);

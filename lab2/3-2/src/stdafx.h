@@ -11,3 +11,4 @@
 #include <windows.h>
 #include <locale>
 #include <clocale>
+#include <sstream>

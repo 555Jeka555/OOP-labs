@@ -1,8 +1,13 @@
 #include "dictionary.h"
 
+const std::string DEFAULT_DICT_PATH = "../src/dictionary.txt";
 const std::string AGREE_CHAR = "y";
 const std::string STOP_ENTER = "...";
 const std::string SEPARATOR = ", ";
+const std::string SEPARATOR_TRANSLATE = ":";
+const std::string STRIP_REGEX = " \t\n\r";
+const char SEPARATOR_CHAR = ',';
+const char SEPARATOR_TRANSLATE_CHAR = ':';
 const char SPACE = ' ';
 const char APOSTROPHE = '`';
 const char QUOT = '\'';
@@ -11,6 +16,71 @@ const char FIRST_CHAR_IN_ALF_LOW = 'a';
 const char LAST_CHAR_IN_ALF_LOW = 'z';
 const char FIRST_CHAR_IN_ALF_HIGH = 'A';
 const char LAST_CHAR_IN_ALF_HIGH = 'Z';
+
+void AddWordsInDicts(std::vector<std::string> words,
+                    std::map<std::string, std::vector<std::string>>& enToRuDict,
+                    std::map<std::string, std::vector<std::string>>& ruToEnDict)
+{
+    enToRuDict[words[0]] = {};
+    for (int i = 1; i < words.size(); i++)
+    {
+        enToRuDict[words[0]].push_back(words[i]);
+        ruToEnDict[words[i]] = {words[0]};
+    }
+}
+
+void StripWords(std::vector<std::string>& words)
+{
+    for (auto &w: words)
+    {
+        w.erase(0, w.find_first_not_of(STRIP_REGEX));
+        w.erase(w.find_last_not_of(STRIP_REGEX) + 1);
+    }
+}
+
+void ParseWordsByInputFile(std::ifstream& inputFile,
+                           std::map<std::string, std::vector<std::string>>& enToRuDict,
+                           std::map<std::string, std::vector<std::string>>& ruToEnDict)
+{
+    std::string line;
+    while (std::getline(inputFile, line))
+    {
+        std::vector<std::string> words;
+        std::istringstream iss(line);
+        std::string word;
+        while (std::getline(iss, word, SEPARATOR_TRANSLATE_CHAR))
+        {
+            std::istringstream inner_iss(word);
+            while (std::getline(inner_iss, word, SEPARATOR_CHAR))
+            {
+                words.push_back(word);
+            }
+        }
+        if (words.empty())
+        {
+            continue;
+        }
+
+        StripWords(words);
+        AddWordsInDicts(words, enToRuDict, ruToEnDict);
+    }
+}
+
+void ParseInputFile(std::ifstream& inputFile,
+                    std::map<std::string, std::vector<std::string>>& enToRuDict,
+                    std::map<std::string, std::vector<std::string>>& ruToEnDict)
+{
+    if (!inputFile.is_open())
+    {
+        std::ofstream outputFile(DEFAULT_DICT_PATH);
+        if (!outputFile.is_open()) {
+            throw std::runtime_error("Failed to create file");
+        }
+    }
+    else {
+        ParseWordsByInputFile(inputFile, enToRuDict, ruToEnDict);
+    }
+}
 
 bool IsEnglandString(const std::string& string)
 {
@@ -143,16 +213,41 @@ void SaveDict(std::ofstream& outputFile, const std::map<std::string, std::vector
         for (auto & it : dict) {
             const std::string& word = it.first;
             std::vector<std::string> translates = it.second;
-            outputFile << word << SPACE << ToStingTranslateByDict(translates) << std::endl;
-            std::cout << "Changes have been made to the dictionary" << std::endl;
+            outputFile << word << SEPARATOR_TRANSLATE << ToStingTranslateByDict(translates) << std::endl;
         }
+        std::cout << "Changes have been made to the dictionary" << std::endl;
     }
 }
 
-void InitSessionTranslate(std::ofstream& outputFile)
+void CheckFlushToOutputFile(std::ofstream& outputFile)
+{
+    if (!outputFile.flush())
+    {
+        throw std::runtime_error("Failed flush to file");
+    }
+}
+
+void CheckOpenOutputFile(std::ofstream& outputFile)
+{
+    if (!outputFile.is_open())
+    {
+        throw std::runtime_error("Failed to open output file");
+    }
+}
+
+void InitSessionTranslate(const std::string& dictFileName)
 {
     std::map<std::string, std::vector<std::string>> enToRuDict = {};
     std::map<std::string, std::vector<std::string>> ruToEnDict = {};
+
+    std::ifstream inputFile;
+    inputFile.open(dictFileName);
+    ParseInputFile(inputFile, enToRuDict, ruToEnDict);
+    inputFile.close();
+
+    std::ofstream outputFile(dictFileName);
+    CheckOpenOutputFile(outputFile);
+
     while (true)
     {
         std::cout << "Enter word" << std::endl;
@@ -162,6 +257,7 @@ void InitSessionTranslate(std::ofstream& outputFile)
         if (enter == STOP_ENTER)
         {
             SaveDict(outputFile, enToRuDict);
+            CheckFlushToOutputFile(outputFile);
             break;
         }
 
