@@ -18,11 +18,8 @@ std::set<int> GeneratePrimeNumbersSet(int upperBound)
         {
             //TODO �������� � 2 ���� ��������� ��� ����,
             // ��� ������ ����� ����� ������ �������� ��� ����������
-            int step = 2*i;
-            if (i == 2)
-            {
-                step = i;
-            }
+            // ? :
+            int step = (i == 2) ? i : i*2;
 
             for (int j = i * i; j <= upperBound; j += step)
             {
