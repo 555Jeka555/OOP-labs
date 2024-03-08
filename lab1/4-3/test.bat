@@ -2,9 +2,10 @@
 
 set CRYPT_FILE=test-data\crypted.txt
 set DECRYPT_FILE=test-data\decrypted.txt
+set DECRYPT_FILE_EXE=test-data\decrypted.exe
 
 echo Test 1
-rem Кодирование и декодирование файла
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 crypt.exe crypt "test-data\test-input.txt" %CRYPT_FILE% 100
 if %errorlevel% == 1 ( goto err )
 crypt.exe decrypt %CRYPT_FILE% %DECRYPT_FILE% 100
@@ -13,7 +14,7 @@ fc %DECRYPT_FILE% "test-data\test-input.txt"
 if %errorlevel% == 1 ( goto err )
 
 echo Test 2
-rem Невалидный ключ декодирования
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 crypt.exe crypt "test-data\test-input.txt" %CRYPT_FILE% 100
 if %errorlevel% == 1 ( goto err )
 crypt.exe decrypt %CRYPT_FILE% %DECRYPT_FILE% 10
@@ -22,7 +23,7 @@ fc %DECRYPT_FILE% "test-data\test-input.txt" > nul
 if %errorlevel% == 0 ( goto err )
 
 echo Test 3
-rem Кодирование и декодирование файл
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 crypt.exe crypt "test-data\test-input-empty.txt" %CRYPT_FILE% 100
 if %errorlevel% == 1 ( goto err )
 crypt.exe decrypt %CRYPT_FILE% %DECRYPT_FILE% 100
@@ -31,7 +32,7 @@ fc %DECRYPT_FILE% "test-data\test-input-empty.txt"
 if %errorlevel% == 1 goto err
 
 echo Test 4
-rem Проверка кодирования и декодирования на binary файл
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ binary пїЅпїЅпїЅпїЅ
 crypt.exe crypt crypt.exe %CRYPT_FILE% 100
 if %errorlevel% == 1 ( goto err )
 crypt.exe decrypt %CRYPT_FILE% %DECRYPT_FILE% 100
@@ -40,32 +41,32 @@ fc %DECRYPT_FILE% crypt.exe
 if %errorlevel% == 1 goto err
 
 echo Test 5
-rem Невалидный ключ по верхнему значению
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 crypt.exe crypt "test-data\test-input.txt" %CRYPT_FILE% 256
 if %errorlevel% == 0 ( goto err )
 
 echo Test 6
-rem Невалидный ключ по нижнему значению
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 crypt.exe crypt "test-data\test-input.txt" %CRYPT_FILE% -1
 if %errorlevel% == 0 ( goto err )
 
 echo Test 7
-rem Невалидный ключ
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 crypt.exe crypt "test-data\test-input.txt" %CRYPT_FILE% "gfda"
 if %errorlevel% == 0 ( goto err )
 
 echo Test 8
-rem Невалидный режим
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 crypt.exe read "test-data\test-input.txt" %CRYPT_FILE% 100
 if %errorlevel% == 0 ( goto err )
 
 echo Test 9
-rem Проверка на открытие не существующего файла
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 crypt.exe crypt "test.txt" %CRYPT_FILE% 100
 if %errorlevel% == 0 ( goto err )
 
 echo Test 10
-rem Проверка на открытие существующего файла
+rem пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 crypt.exe crypt "test-data\test-input.txt" "./crypt.exe" 100
 if %errorlevel% == 0 ( goto err )
 

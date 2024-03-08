@@ -130,10 +130,9 @@ void CryptFile(std::ifstream& inputFile, std::ofstream& outputFile, int key)
         byte = static_cast<char>(byte ^ key);
         outputFile.put(static_cast<char>(CryptBits(byte)));
     }
-
-    CheckReadingInputFile(inputFile);
 }
 
+// TODO CheckReadingInputFile outside
 void DecryptFile(std::ifstream& inputFile, std::ofstream& outputFile, int key)
 {
     char byte;
@@ -142,49 +141,32 @@ void DecryptFile(std::ifstream& inputFile, std::ofstream& outputFile, int key)
         byte = static_cast<char>(DecryptBits(byte) ^ key);
         outputFile.put(byte);
     }
-
-    CheckReadingInputFile(inputFile);
 }
 
-void Crypt(const std::string& inputFilePath, const std::string& outputFilePath, int key)
-{
-    CheckValidCryptKey(key);
-    std::ifstream inputFile(inputFilePath, std::ios::binary | std::ios::in);
-    std::ofstream outputFile(outputFilePath, std::ios::binary | std::ios::out);
-    CheckValidOpenFiles(inputFile, outputFile);
-
-    CryptFile(inputFile, outputFile, key);
-
-    CheckValidFlushOutputFile(outputFile);
-}
-
-void Decrypt(const std::string& inputFilePath, const std::string& outputFilePath, int key)
-{
-    CheckValidCryptKey(key);
-    std::ifstream inputFile(inputFilePath, std::ios::binary | std::ios::in);
-    std::ofstream outputFile(outputFilePath, std::ios::binary | std::ios::out);
-
-    CheckValidOpenFiles(inputFile, outputFile);
-
-    DecryptFile(inputFile, outputFile, key);
-
-    CheckValidFlushOutputFile(outputFile);
-}
-
+// TODO valid in function
+// TODO std::ios:in/out not
 int main(int argc, char *argv[])
 {
     try
     {
         CheckValidArgumentCount(argc);
         Args args = ParseArgs(argv);
+        CheckValidCryptKey(args.key);
+
+        std::ifstream inputFile(args.inputFileName, std::ios::binary);
+        std::ofstream outputFile(args.outputFileName, std::ios::binary);
+        CheckValidOpenFiles(inputFile, outputFile);
+
         if (args.mode == Mode::CRYPT)
         {
-            Crypt(args.inputFileName, args.outputFileName, args.key);
+            CryptFile(inputFile, outputFile, args.key);
         }
         else
         {
-            Decrypt(args.inputFileName, args.outputFileName, args.key);
+            DecryptFile(inputFile, outputFile, args.key);
         }
+        CheckReadingInputFile(inputFile);
+        CheckValidFlushOutputFile(outputFile);
     }
     catch (const std::runtime_error &e)
     {
