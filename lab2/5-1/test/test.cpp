@@ -1,167 +1,179 @@
 #include <gtest/gtest.h>
-#include <sstream>
-#include "../src/dictionary.h"
+#include "../src/parserURL.h"
 
-TEST (dict, error_en_to_ru)
+// http://www.mysite.com/docs/document1.html?page=30&lang=en#title
+
+TEST (parse_url, parse_protocols_success)
 {
-    std::map<std::string, std::vector<std::string>> enToRuDict = {};
-    std::map<std::string, std::vector<std::string>> ruToEnDict = {};
-    std::map<std::string, std::vector<std::string>> expectedEnToRuDict = {};
-    std::map<std::string, std::vector<std::string>> expectedRuToEnDict = {};
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url = "http://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    bool isParseURL = ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ(Protocol::HTTP, protocol);
 
-    std::istringstream mockInput("cat\n");
-    std::streambuf* origCin = std::cin.rdbuf(mockInput.rdbuf());
+    url = "https://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    isParseURL = ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ(Protocol::HTTPS, protocol);
 
-    AddTranslate(enToRuDict, ruToEnDict, "cat");
-
-    EXPECT_EQ(enToRuDict, expectedEnToRuDict);
-    EXPECT_EQ(ruToEnDict, expectedRuToEnDict);
-
-    std::cin.rdbuf(origCin);
+    url = "ftp://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    isParseURL = ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ(Protocol::FTP, protocol);
 }
 
-TEST (dict, error_ru_to_en)
+TEST (parse_url, parse_protocols_error)
 {
-    std::map<std::string, std::vector<std::string>> enToRuDict = {};
-    std::map<std::string, std::vector<std::string>> ruToEnDict = {};
-    std::map<std::string, std::vector<std::string>> expectedEnToRuDict = {};
-    std::map<std::string, std::vector<std::string>> expectedRuToEnDict = {};
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url = "htt://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    bool isParseURL = ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
 
-    std::istringstream mockInput("кот\n");
-    std::streambuf* origCin = std::cin.rdbuf(mockInput.rdbuf());
+    url = "://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    isParseURL = ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
 
-    AddTranslate(enToRuDict, ruToEnDict, "кот");
-
-    EXPECT_EQ(enToRuDict, expectedEnToRuDict);
-    EXPECT_EQ(ruToEnDict, expectedRuToEnDict);
-
-    std::cin.rdbuf(origCin);
+    url = "www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    isParseURL = ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
 }
 
-TEST (dict, add_en_words_with_ru_translates)
+TEST (parse_url, parse_ports_success)
 {
-    std::map<std::string, std::vector<std::string>> enToRuDict = {};
-    std::map<std::string, std::vector<std::string>> ruToEnDict = {};
-    std::map<std::string, std::vector<std::string>> expectedEnToRuDict = {
-            {"cat", {"кот"}},
-            {"dog", {"пёс"}},
-    };
-    std::map<std::string, std::vector<std::string>> expectedRuToEnDict = {
-            {"кот", {"cat"}},
-            {"пёс", {"dog"}},
-    };
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url = "http://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    bool isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ(80, port);
 
-    std::istringstream mockInput("кот\nпёс\n");
-    std::streambuf* origCin = std::cin.rdbuf(mockInput.rdbuf());
+    url = "https://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ(443, port);
 
-    AddTranslate(enToRuDict, ruToEnDict, "cat");
-    AddTranslate(enToRuDict, ruToEnDict, "dog");
+    url = "ftp://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ(21, port);
 
-    EXPECT_EQ(enToRuDict, expectedEnToRuDict);
-    EXPECT_EQ(ruToEnDict, expectedRuToEnDict);
-
-    std::cin.rdbuf(origCin);
+    url = "ftp://www.mysite.com:8000/docs/document1.html?page=30&lang=en#title";
+    isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ(8000, port);
 }
 
-TEST (dict, add_ru_words_with_en_translates)
+TEST (parse_url, parse_ports_error)
 {
-    std::map<std::string, std::vector<std::string>> enToRuDict = {};
-    std::map<std::string, std::vector<std::string>> ruToEnDict = {};
-    std::map<std::string, std::vector<std::string>> expectedEnToRuDict = {
-            {"cat", {"кот"}},
-            {"dog", {"пёс"}},
-    };
-    std::map<std::string, std::vector<std::string>> expectedRuToEnDict = {
-            {"кот", {"cat"}},
-            {"пёс", {"dog"}},
-    };
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url = "http://www.mysite.com:0/docs/document1.html?page=30&lang=en#title";
+    bool isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
 
-    std::istringstream mockInput("cat\ndog\n");
-    std::streambuf* origCin = std::cin.rdbuf(mockInput.rdbuf());
+    url = "http://www.mysite.com:65536/docs/document1.html?page=30&lang=en#title";
+    isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
 
-    AddTranslate(enToRuDict, ruToEnDict, "кот");
-    AddTranslate(enToRuDict, ruToEnDict, "пёс");
+    url = "http://www.mysite.com:/docs/document1.html?page=30&lang=en#title";
+    isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
 
-    EXPECT_EQ(enToRuDict, expectedEnToRuDict);
-    EXPECT_EQ(ruToEnDict, expectedRuToEnDict);
-
-    std::cin.rdbuf(origCin);
+    url = "http://www.mysite.com:cat/docs/document1.html?page=30&lang=en#title";
+    isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
 }
 
-TEST (dict, add_any_translates_for_word)
+TEST (parse_url, parse_host_success)
 {
-    std::map<std::string, std::vector<std::string>> enToRuDict = {};
-    std::map<std::string, std::vector<std::string>> ruToEnDict = {};
-    std::map<std::string, std::vector<std::string>> expectedEnToRuDict = {
-            {"cat", {"кот", "кошка"}},
-            {"kitty", {"кошка"}},
-    };
-    std::map<std::string, std::vector<std::string>> expectedRuToEnDict = {
-            {"кот", {"cat"}},
-            {"кошка", {"cat", "kitty"}},
-    };
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url = "http://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    bool isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ("www.mysite.com", host);
 
-    std::istringstream mockInput("кот\ncat\nкошка\n");
-    std::streambuf* origCin = std::cin.rdbuf(mockInput.rdbuf());
-
-    AddTranslate(enToRuDict, ruToEnDict, "cat");
-    AddTranslate(enToRuDict, ruToEnDict, "кошка");
-    AddTranslate(enToRuDict, ruToEnDict, "kitty");
-
-    EXPECT_EQ(enToRuDict, expectedEnToRuDict);
-    EXPECT_EQ(ruToEnDict, expectedRuToEnDict);
-
-    std::cin.rdbuf(origCin);
+    url = "https://www/docs/document1.html?page=30&lang=en#title";
+    isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ("www", host);
 }
 
-TEST (dict, add_en_phrase_with_ru_translates)
+TEST (parse_url, parse_host_error)
 {
-    std::map<std::string, std::vector<std::string>> enToRuDict = {};
-    std::map<std::string, std::vector<std::string>> ruToEnDict = {};
-    std::map<std::string, std::vector<std::string>> expectedEnToRuDict = {
-            {"The Red Square", {"Красная Площадь"}},
-            {"Rosa Khutor", {"Роза Xутор"}},
-    };
-    std::map<std::string, std::vector<std::string>> expectedRuToEnDict = {
-            {"Красная Площадь", {"The Red Square"}},
-            {"Роза Xутор", {"Rosa Khutor"}},
-    };
-
-    std::istringstream mockInput("Красная Площадь\nРоза Xутор\n");
-    std::streambuf* origCin = std::cin.rdbuf(mockInput.rdbuf());
-
-    AddTranslate(enToRuDict, ruToEnDict, "The Red Square");
-    AddTranslate(enToRuDict, ruToEnDict, "Rosa Khutor");
-
-    EXPECT_EQ(enToRuDict, expectedEnToRuDict);
-    EXPECT_EQ(ruToEnDict, expectedRuToEnDict);
-
-    std::cin.rdbuf(origCin);
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url = "http:///docs/document1.html?page=30&lang=en#title";
+    bool isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
 }
 
-TEST (dict, add_ru_phrase_with_en_translates)
+TEST (parse_url, parse_document_success)
 {
-    std::map<std::string, std::vector<std::string>> enToRuDict = {};
-    std::map<std::string, std::vector<std::string>> ruToEnDict = {};
-    std::map<std::string, std::vector<std::string>> expectedEnToRuDict = {
-            {"The Red Square", {"Красная Площадь"}},
-            {"Rosa Khutor", {"Роза Xутор"}},
-    };
-    std::map<std::string, std::vector<std::string>> expectedRuToEnDict = {
-            {"Красная Площадь", {"The Red Square"}},
-            {"Роза Xутор", {"Rosa Khutor"}},
-    };
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url = "http://www.mysite.com/docs/document1.html?page=30&lang=en#title";
+    bool isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ("docs/document1.html?page=30&lang=en#title", document);
 
-    std::istringstream mockInput("The Red Square\nRosa Khutor\n");
-    std::streambuf* origCin = std::cin.rdbuf(mockInput.rdbuf());
+    url = "http://www.mysite.com/";
+    isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ("", document);
+}
 
-    AddTranslate(enToRuDict, ruToEnDict, "Красная Площадь");
-    AddTranslate(enToRuDict, ruToEnDict, "Роза Xутор");
+TEST (parse_url, parse_document_error)
+{
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url = "http://www.mysite.com";
+    bool isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
+}
 
-    EXPECT_EQ(enToRuDict, expectedEnToRuDict);
-    EXPECT_EQ(ruToEnDict, expectedRuToEnDict);
+TEST (parse_url, empty_url_error)
+{
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url;
+    bool isParseURL =  ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(false, isParseURL);
+}
 
-    std::cin.rdbuf(origCin);
+TEST (parse_url, parse_url_success)
+{
+    Protocol protocol;
+    int port;
+    std::string host;
+    std::string document;
+    std::string url = "http://www.mysite.com:8085/docs/document1.html?page=30&lang=en#title";
+    bool isParseURL = ParseURL(url, protocol, port, host, document);
+    EXPECT_EQ(true, isParseURL);
+    EXPECT_EQ(Protocol::HTTP, protocol);
+    EXPECT_EQ("www.mysite.com", host);
+    EXPECT_EQ(8085, port);
+    EXPECT_EQ("docs/document1.html?page=30&lang=en#title", document);
 }
 
 
