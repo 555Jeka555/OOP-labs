@@ -14,10 +14,10 @@ public:
     std::pair<int, int> GetPermissibleSpeedByGear(int gear) const;
 
 private:
-    const int m_min_gear = -1;
-    const int m_max_gear = 5;
+    const int m_minGear = -1;
+    const int m_maxGear = 5;
     int m_gear = 0;
-    mutable std::map<int, std::pair<int, int>> m_permissibleSpeedByGear = {
+    const std::map<int, std::pair<int, int>> m_permissibleSpeedByGear = {
             {-1, {0, 20}},
             {0, {0, 150}},
             {1, {0, 30}},

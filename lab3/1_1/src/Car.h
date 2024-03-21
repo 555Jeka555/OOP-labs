@@ -5,7 +5,8 @@
 #include "Engine.h"
 #include "Transmission.h"
 
-enum class DirectionMovement {
+enum class DirectionMovement
+{
     FORWARD,
     BACKWARD,
     STANDING_STILL,
@@ -30,12 +31,12 @@ public:
     int GetGear() const;
 
 private:
-    const int m_min_speed = 0;
+    const int m_minSpeed = 0;
     Engine m_engine = {};
     Transmission m_transmission = {};
     int m_speed = 0;
     DirectionMovement m_directionMovement = DirectionMovement::STANDING_STILL;
-    mutable std::map<DirectionMovement, std::string> m_directionMovementToString = {
+    const std::map<DirectionMovement, std::string> m_directionMovementToString = {
             {DirectionMovement::STANDING_STILL, "standing still"},
             {DirectionMovement::BACKWARD, "backward"},
             {DirectionMovement::FORWARD, "forward"},

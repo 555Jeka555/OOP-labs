@@ -61,7 +61,7 @@ void HandlerSetGear(Car& car)
     {
         gear = std::stoi(argument);
     }
-    catch (const std::runtime_error &e)
+    catch (const std::exception &e)
     {
         std::cerr << "Invalid input" << std::endl;
         return;
@@ -90,7 +90,7 @@ void HandlerSetSpeed(Car& car)
     {
         speed = std::stoi(argument);
     }
-    catch (const std::runtime_error &e)
+    catch (const std::exception &e)
     {
         std::cerr << "Invalid input" << std::endl;
         return;
