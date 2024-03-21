@@ -22,10 +22,15 @@ set(SOURCE_FILES
         src/Engine.h
         src/Transmission.cpp
         src/Transmission.h
+        src/commandHandler.cpp
+        src/commandHandler.h
 )
 
 set(TEST_SOURCE_FILES
         test/test.cpp
+        src/Car.cpp
+        src/Engine.cpp
+        src/Transmission.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

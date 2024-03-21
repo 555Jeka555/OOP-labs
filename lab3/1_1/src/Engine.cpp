@@ -1,26 +1,16 @@
 #include "Engine.h"
 
-bool Engine::IsTurnedOn()
+bool Engine::IsTurnedOn() const
 {
-    return Engine::m_isTurnedOn;
+    return this->m_isTurnedOn;
 }
 
-bool Engine::TurnOnEngine()
+void Engine::TurnOnEngine()
 {
-
+    this->m_isTurnedOn = true;
 }
 
-bool Engine::TurnOffEngine()
+void Engine::TurnOffEngine()
 {
-
-}
-
-bool Engine::SetSpeed(int speed)
-{
-
-}
-
-int Engine::GetSpeed() const
-{
-
+    this->m_isTurnedOn = false;
 }

@@ -5,17 +5,21 @@
 
 class Transmission {
 public:
-    bool SetGear(int gear);
+    void SetGear(int gear);
 
     int GetGear() const;
+
+    bool IsGearExist(int gear) const;
 
     std::pair<int, int> GetPermissibleSpeedByGear(int gear) const;
 
 private:
+    const int m_min_gear = -1;
+    const int m_max_gear = 5;
     int m_gear = 0;
     mutable std::map<int, std::pair<int, int>> m_permissibleSpeedByGear = {
             {-1, {0, 20}},
-            {0, {0, 149}},
+            {0, {0, 150}},
             {1, {0, 30}},
             {2, {20, 50}},
             {3, {30, 60}},

@@ -1,81 +1,124 @@
 #include "Car.h"
 
-DirectionMovement Car::GetDirection()
+std::string Car::GetDirection() const
 {
-    // Implement logic to return the current direction of the car
+    return this->m_directionMovementToString[this->m_directionMovement];
 }
 
-bool Car::IsTurnedOn()
+bool Car::IsTurnedOn() const
 {
-    return Car::m_engine.IsTurnedOn();
+    return this->m_engine.IsTurnedOn();
 }
 
 bool Car::TurnOnEngine()
 {
-    Car::m_engine.TurnOnEngine();
+    this->m_engine.TurnOnEngine();
 
-    return Car::m_engine.IsTurnedOn();
+    return this->m_engine.IsTurnedOn();
 }
 
 bool Car::TurnOffEngine()
 {
-    if (Car::m_engine.IsTurnedOn()
-        && Car::m_transmission.GetGear() == 0
-        && Car::m_engine.GetSpeed() == 0)
+    if (this->m_engine.IsTurnedOn()
+        && this->m_transmission.GetGear() == 0
+        && this->m_speed == 0)
     {
-        Car::m_engine.TurnOffEngine();
+        this->m_engine.TurnOffEngine();
     }
 
-    return !Car::m_engine.IsTurnedOn();
+    return !this->m_engine.IsTurnedOn();
 }
 
 bool Car::SetSpeed(int speed)
 {
-    int currentGear = Car::m_transmission.GetGear();
-    int currenSpeed = Car::m_engine.GetSpeed();
+    bool isInvalidSpeed = speed < m_min_speed;
+
+    if (isInvalidSpeed
+        || !this->m_engine.IsTurnedOn())
+    {
+        return false;
+    }
+
+    int currentGear = this->m_transmission.GetGear();
 
     std::pair<int, int> permissibleSpeedByCurrentGear =
-            Car::m_transmission.GetPermissibleSpeedByGear(currentGear);
+            this->m_transmission.GetPermissibleSpeedByGear(currentGear);
     int minSpeed = permissibleSpeedByCurrentGear.first;
     int maxSpeed = permissibleSpeedByCurrentGear.second;
 
-    if (currentGear == 0 && speed >= currenSpeed)
+    bool isSpeedUpOnNeutralGear = currentGear == 0 && speed > this->m_speed;
+    if (isSpeedUpOnNeutralGear)
     {
         return false;
     }
 
-    if (speed < minSpeed || minSpeed > maxSpeed)
+    bool isSpeedExceededAllowedSpeedLimit = speed < minSpeed || speed > maxSpeed;
+    if (isSpeedExceededAllowedSpeedLimit)
     {
         return false;
     }
 
-    return Car::m_engine.SetSpeed(speed);
+    if (speed == 0)
+    {
+        this->m_directionMovement = DirectionMovement::STANDING_STILL;
+    }
+    else if (currentGear == -1)
+    {
+        this->m_directionMovement = DirectionMovement::BACKWARD;
+    }
+    else if (currentGear > 0)
+    {
+        this->m_directionMovement = DirectionMovement::FORWARD;
+    }
+
+    this->m_speed = speed;
+    return true;
 }
 
 int Car::GetSpeed() const
 {
-    return Car::m_engine.GetSpeed();
+    return this->m_speed;
 }
 
 bool Car::SetGear(int gear)
 {
-    int currentGear = Car::m_transmission.GetGear();
-    int currenSpeed = Car::m_engine.GetSpeed();
+    bool isSwitchGearOnNotAllowedBeforeTurnedOn = !this->m_engine.IsTurnedOn() && gear != 0;
 
-    std::pair<int, int> permissibleSpeedByNewGear =
-            Car::m_transmission.GetPermissibleSpeedByGear(gear);
-    int minSpeed = permissibleSpeedByNewGear.first;
-    int maxSpeed = permissibleSpeedByNewGear.second;
+    bool isSwitchBackwardWithSpeed = gear == -1 && this->m_speed != 0;
 
-    if (currenSpeed <= minSpeed || currenSpeed >= maxSpeed)
+    bool isSwitchHighGearFromBackwardGearWithSpeed =
+            this->m_transmission.GetGear() == -1 && gear > 0 && this->m_speed != 0;
+
+    bool isSwitchGearUpWhenBackward =
+            this->m_transmission.GetGear() == 0
+            && this->m_directionMovement == DirectionMovement::BACKWARD;
+
+    if (isSwitchGearOnNotAllowedBeforeTurnedOn
+        || isSwitchBackwardWithSpeed
+        || isSwitchHighGearFromBackwardGearWithSpeed
+        || isSwitchGearUpWhenBackward
+        || this->m_transmission.IsGearExist(gear))
     {
         return false;
     }
 
-    return SetGear(gear);
+    std::pair<int, int> permissibleSpeedByNewGear =
+            this->m_transmission.GetPermissibleSpeedByGear(gear);
+    int minSpeed = permissibleSpeedByNewGear.first;
+    int maxSpeed = permissibleSpeedByNewGear.second;
+
+    bool isSpeedNotAllowedToSwitchGear =
+            this->m_speed < minSpeed || this->m_speed > maxSpeed;
+    if (isSpeedNotAllowedToSwitchGear)
+    {
+        return false;
+    }
+
+    this->m_transmission.SetGear(gear);
+    return true;
 }
 
 int Car::GetGear() const
 {
-    return Car::m_transmission.GetGear();
+    return this->m_transmission.GetGear();
 }

@@ -5,19 +5,14 @@
 
 class Engine {
 public:
-    bool IsTurnedOn();
+    bool IsTurnedOn() const;
 
-    bool TurnOnEngine();
+    void TurnOnEngine();
 
-    bool TurnOffEngine();
-
-    bool SetSpeed(int speed);
-
-    int GetSpeed() const;
+    void TurnOffEngine();
 
 private:
     bool m_isTurnedOn = false;
-    int m_speed = 0;
 };
 
 

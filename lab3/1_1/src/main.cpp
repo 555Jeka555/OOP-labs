@@ -1,8 +1,7 @@
-#include <iostream>
-#include "Car.h"
+#include "commandHandler.h"
 
 int main() {
-    Car car;
-    std::cout << car.IsTurnedOn()<< std::endl;
+    std::cout << "Let`s start" << std::endl;
+    CommandHandler();
     return 0;
 }

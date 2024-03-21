@@ -1,16 +1,21 @@
 #include "Transmission.h"
 
-bool Transmission::SetGear(int gear)
+void Transmission::SetGear(int gear)
 {
-
+    this->m_gear = gear;
 }
 
 int Transmission::GetGear() const
 {
+    return this->m_gear;
+}
 
+bool Transmission::IsGearExist(int gear) const
+{
+    return gear < this->m_min_gear || gear > this->m_max_gear;
 }
 
 std::pair<int, int> Transmission::GetPermissibleSpeedByGear(int gear) const
 {
-    return Transmission::m_permissibleSpeedByGear[gear];
+    return this->m_permissibleSpeedByGear[gear];
 }

@@ -8,13 +8,14 @@
 enum class DirectionMovement {
     FORWARD,
     BACKWARD,
+    STANDING_STILL,
 };
 
 class Car {
 public:
-    DirectionMovement GetDirection();
+    std::string GetDirection() const;
 
-    bool IsTurnedOn();
+    bool IsTurnedOn() const;
 
     bool TurnOnEngine();
 
@@ -29,8 +30,16 @@ public:
     int GetGear() const;
 
 private:
+    const int m_min_speed = 0;
     Engine m_engine = {};
-    const Transmission m_transmission = {};
+    Transmission m_transmission = {};
+    int m_speed = 0;
+    DirectionMovement m_directionMovement = DirectionMovement::STANDING_STILL;
+    mutable std::map<DirectionMovement, std::string> m_directionMovementToString = {
+            {DirectionMovement::STANDING_STILL, "standing still"},
+            {DirectionMovement::BACKWARD, "backward"},
+            {DirectionMovement::FORWARD, "forward"},
+    };
 };
 
 
